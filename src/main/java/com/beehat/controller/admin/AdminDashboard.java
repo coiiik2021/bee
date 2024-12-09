@@ -41,34 +41,28 @@ public class AdminDashboard {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getMonthlySales(
-            @RequestParam String date,
+            @RequestParam int month,
+            @RequestParam int year,
             @RequestParam String type) {
 
-        LocalDate selectedDate = LocalDate.parse(date);  // Chuyển đổi String thành LocalDate
-        int month = selectedDate.getMonthValue();        // Lấy tháng từ ngày
-        int year = selectedDate.getYear();
-        // Lấy doanh thu cho từng tháng trong năm
-        List<Integer> monthlySales = dashBoard.getDoanhThuTheoNam(year, type);
+        List<Integer> sales = dashBoard.getDoanhThuTheoThang(month, year, type);
 
-        // Tạo danh sách tháng trong năm
-        List<Integer> labels = IntStream.rangeClosed(1, 12).boxed().collect(Collectors.toList());
+        int daysInMonth = YearMonth.of(year, month).lengthOfMonth();
+        List<Integer> labels = IntStream.rangeClosed(1, daysInMonth).boxed().collect(Collectors.toList());
 
-        // Doanh thu theo loại (offline/online)
-        int totalSales = monthlySales.stream().mapToInt(Integer::intValue).sum();
+        int totalSales = sales.stream().mapToInt(Integer::intValue).sum();
         List<Integer> salesByType = List.of(
-                totalSales / 2, // Ví dụ: Chia đều doanh thu cho online và offline
+                totalSales / 2,
                 totalSales / 2
         );
 
         Map<String, Object> result = new HashMap<>();
-        result.put("labels", labels); // Các tháng trong năm
-        result.put("sales", monthlySales); // Doanh thu theo từng tháng
-        result.put("salesByType", salesByType); // Doanh thu theo loại bán hàng
+        result.put("labels", labels);
+        result.put("sales", sales);
+        result.put("salesByType", salesByType);
 
         return ResponseEntity.ok(result);
     }
-
-
     @GetMapping("/banchay")
     public ResponseEntity<List<ProductResponse>> getTopSellingProducts(
             @RequestParam(value = "limit", defaultValue = "10") int limit) {

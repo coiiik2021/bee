@@ -329,15 +329,15 @@
         <script>
             const ctx = document.getElementById('salesChart').getContext('2d');
 
-            // Tạo biểu đồ doanh thu theo tháng
+            // Tạo biểu đồ ban đầu
             const salesChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [], // Sẽ được cập nhật từ API (các tháng trong năm)
+                    labels: [], // Sẽ được cập nhật từ API
                     datasets: [
                         {
-                            label: 'Doanh thu theo tháng',
-                            data: [], // Doanh thu theo tháng sẽ được cập nhật từ API
+                            label: 'Doanh số',
+                            data: [], // Sẽ được cập nhật từ API
                             borderColor: 'rgba(54, 162, 235, 1)',
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
                             fill: true,
@@ -355,13 +355,13 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Tháng trong năm'
+                                text: 'tháng theo năm'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Doanh thu (VNĐ)'
+                                text: 'Doanh thu (đ)'
                             },
                             beginAtZero: true
                         }
@@ -370,35 +370,41 @@
             });
 
             // Hàm fetch dữ liệu từ RestController
-            async function fetchYearlySales(year, type) {
+            async function fetchMonthlySales(month, year, type) {
                 try {
-                    const response = await fetch(`/doanhthu?date=${year}&type=${type}`);
+                    const response = await fetch(`/doanhthu?month=${month}&year=${year}&type=${type}`);
                     const data = await response.json();
 
                     // Cập nhật dữ liệu cho biểu đồ
-                    salesChart.data.labels = data.labels; // Các tháng trong năm
-                    salesChart.data.datasets[0].data = data.sales; // Doanh thu theo tháng
+                    salesChart.data.labels = data.labels; // Mảng ngày [1, 2, ..., 31]
+                    salesChart.data.datasets[0].data = data.sales; // Mảng doanh thu
                     salesChart.update(); // Cập nhật biểu đồ
                 } catch (error) {
                     console.error('Lỗi khi lấy dữ liệu:', error);
                 }
             }
 
-            // Lấy giá trị năm và loại bán hàng từ người dùng
+            // Lấy giá trị tháng, năm và loại bán hàng từ người dùng
             function updateSalesChart() {
-                const yearInput = document.getElementById('salesDate').value;
+                const dateInput = document.getElementById('salesDate').value;
                 const salesType = document.getElementById('salesType').value;
 
+                // Chuyển ngày thành tháng và năm
+                const selectedDate = new Date(dateInput);
+                const month = selectedDate.getMonth() + 1; // Tháng (1-12)
+                const year = selectedDate.getFullYear(); // Năm
+
                 // Gọi hàm fetch dữ liệu
-                fetchYearlySales(yearInput, salesType);
+                fetchMonthlySales(month, year, salesType);
             }
 
             // Lắng nghe sự kiện thay đổi
             document.getElementById('salesDate').addEventListener('change', updateSalesChart);
             document.getElementById('salesType').addEventListener('change', updateSalesChart);
 
-            // Gọi hàm fetch dữ liệu lần đầu (năm hiện tại)
+            // Gọi hàm fetch dữ liệu lần đầu (tháng hiện tại)
             updateSalesChart();
+
         </script>
         <script>
             // Ensure you are using the right chart data
