@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice Print</title>
+</head>
+<body>
+<iframe id="invoiceFrame"
+        th:src="@{'/{id}/pdf'(id=${invoiceId})}"
+        style="display:none;"
+        onload="printInvoice()">
+</iframe>
+
+<script>
+  function printInvoice() {
+    const invoiceFrame = document.getElementById('invoiceFrame');
+    invoiceFrame.contentWindow.print();
+  }
+</script>
+</body>
+</html>

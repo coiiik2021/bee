@@ -2,16 +2,20 @@ package com.beehat.controller.admin;
 
 import com.beehat.entity.Employee;
 import com.beehat.repository.EmployeeRepo;
+import com.beehat.service.DashBoard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Controller
@@ -19,6 +23,10 @@ import java.security.Principal;
 public class AdminController {
     @Autowired
     EmployeeRepo employeeRepo;
+    @Autowired
+    DashBoard dashBoard;
+
+
     @ModelAttribute("iconTitle")
     String iconTitle() {
         return "ph ph-house-simple fs-3";
@@ -27,8 +35,24 @@ public class AdminController {
     String pageTitle() {
         return "Trang chủ";
     }
+
+
     @GetMapping("/index")
-    public String index() {
+    public String index(Model model) {
+        int[] total = dashBoard.total();
+        int[] online = dashBoard.totalOnline();
+
+        int[] offline = new int[]{Math.abs(total[0] - online[0]), Math.abs(total[1] - online[1])};
+
+
+        double[] tile = dashBoard.tileOnline();
+
+
+        model.addAttribute("total", total);
+        model.addAttribute("online", online);
+        model.addAttribute("offline", offline);
+        model.addAttribute("tile", tile);
+
         return "admin/index";
     }
     @GetMapping("/login")

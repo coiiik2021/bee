@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{/employee/template}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lí hoá đơn</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/pixeden-stroke-7-icon@1.2.3/pe-icon-7-stroke/dist/pe-icon-7-stroke.min.css">
+    <style>
+
+        .steps .step {
+            display: block;
+            width: 100%;
+            margin-bottom: 35px;
+            text-align: center
+        }
+
+        .steps .step .step-icon-wrap {
+            display: block;
+            position: relative;
+            width: 100%;
+            height: 80px;
+            text-align: center
+        }
+
+        .steps .step .step-icon-wrap::before,
+        .steps .step .step-icon-wrap::after {
+            display: block;
+            position: absolute;
+            top: 50%;
+            width: 50%;
+            height: 3px;
+            margin-top: -1px;
+            background-color: #e1e7ec;
+            content: '';
+            z-index: 1
+        }
+
+        .steps .step .step-icon-wrap::before {
+            left: 0
+        }
+
+        .steps .step .step-icon-wrap::after {
+            right: 0
+        }
+
+        .steps .step .step-icon {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border: 1px solid #e1e7ec;
+            border-radius: 50%;
+            background-color: #f5f5f5;
+            color: #374250;
+            font-size: 38px;
+            line-height: 81px;
+            z-index: 5
+        }
+
+        .steps .step .step-title {
+            margin-top: 16px;
+            margin-bottom: 0;
+            color: #606975;
+            font-size: 14px;
+            font-weight: 500
+        }
+
+        .steps .step:first-child .step-icon-wrap::before {
+            display: none
+        }
+
+        .steps .step:last-child .step-icon-wrap::after {
+            display: none
+        }
+
+        .steps .step.completed .step-icon-wrap::before,
+        .steps .step.completed .step-icon-wrap::after {
+            background-color: #0da9ef
+        }
+
+        .steps .step.completed .step-icon {
+            border-color: #0da9ef;
+            background-color: #0da9ef;
+            color: #fff
+        }
+
+        @media (max-width: 576px) {
+            .flex-sm-nowrap .step .step-icon-wrap::before,
+            .flex-sm-nowrap .step .step-icon-wrap::after {
+                display: none
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flex-md-nowrap .step .step-icon-wrap::before,
+            .flex-md-nowrap .step .step-icon-wrap::after {
+                display: none
+            }
+        }
+
+        @media (max-width: 991px) {
+            .flex-lg-nowrap .step .step-icon-wrap::before,
+            .flex-lg-nowrap .step .step-icon-wrap::after {
+                display: none
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .flex-xl-nowrap .step .step-icon-wrap::before,
+            .flex-xl-nowrap .step .step-icon-wrap::after {
+                display: none
+            }
+        }
+
+        .bg-faded, .bg-secondary {
+            background-color: #f5f5f5 !important;
+        }
+
+        .icon-large {
+            font-size: 1.5rem; /* Tăng kích thước biểu tượng */
+            margin-right: 7px; /* Khoảng cách giữa các biểu tượng */
+            margin-left: 7px;
+            text-align: center;
+        }
+
+        th, td {
+            text-align: center; /* Căn giữa theo chiều ngang */
+        }
+    </style>
+</head>
+<body>
+<main class="content px-3 py-4" layout:fragment="main">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/employee/dashboard}">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/employee/order/index}">Xác nhận đơn hàng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chi tiết đơn hàng</li>
+        </ol>
+    </nav>
+    <div class="container-fluid padding-bottom-3x mb-1">
+        <div class="card mb-3">
+            <div class="p-4 text-center text-black text-lg rounded-top" style="background: #0da9ef"><span
+                    class="text-uppercase">Mã theo dõi đơn hàng - </span><span class="text-medium"
+                                                                               th:text="${invoice.invoiceTrackingNumber}"></span>
+            </div>
+            <div class="d-flex flex-wrap flex-sm-nowrap justify-content-between py-3 px-2 bg-secondary">
+                <div class="w-100 text-center py-1 px-2"><span class="text-medium">Hình thức :</span> <span
+                        th:if="${invoice.invoiceStatus == 0}">Tại quầy</span>
+                    <span th:if="${invoice.invoiceStatus == 1}">Bán online</span></div>
+                <div class="w-100 text-center py-1 px-2"><span class="text-medium">Trạng thái : <span
+                        th:if="${invoice.status == 0}">Chưa thanh toán</span>
+                        <span th:if="${invoice.status == 1}">Bị huỷ</span>
+                    <span th:if="${invoice.status == 2}">Đã thanh toán</span>
+                        <span th:if="${invoice.status == 3}">Chờ xác nhận</span>
+                </span>
+                </div>
+                <div class="w-100 text-center py-1 px-2"><span class="text-medium">Ngày tạo hoá đơn:</span>
+                    [[${#temporals.format(invoice.createdDate, 'dd/MM/yyyy HH:mm')}]]
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 0}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Tạo đơn hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+                <a th:href="@{/employee/order/canceled-invoice/{id}(id=${invoice.id})}">
+                    <button class="btn btn-danger">Huỷ</button>
+                </a>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 1}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Tạo đơn hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-junk"></i></div>
+                        </div>
+                        <h4 class="step-title">Huỷ hoá đơn</h4>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 2}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Tạo đơn hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 3}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ xác nhận</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Xác nhận đơn hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ lấy hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ vận chuyển</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Giao hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a th:href="@{/employee/order/confirm-invoice/{id}(id=${invoice.id})}">
+                            <button th:if="${invoice.status == 3}" class="btn btn-primary">Xác nhận</button>
+                        </a>
+                        <a th:href="@{/employee/order/canceled-invoice/{id}(id=${invoice.id})}">
+                            <button th:if="${invoice.status == 3 || invoice.status == 4}" class="btn btn-danger">Huỷ
+                            </button>
+                        </a>
+                    </div>
+                    <div>
+                        <button th:if="${invoice.status == 3 || invoice.status == 4}" class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target='#historyModal'>Lịch sử
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 4}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ xác nhận</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Xác nhận đơn hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ lấy hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ vận chuyển</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Giao hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a th:href="@{/employee/order/canceled-invoice/{id}(id=${invoice.id})}">
+                            <button th:if="${invoice.status == 3 || invoice.status == 4}" class="btn btn-danger">Huỷ
+                            </button>
+                        </a>
+                        <a th:href="@{/employee/order/pick-up/{id}(id=${invoice.id})}">
+                            <button th:if="${invoice.status == 3 || invoice.status == 4}" class="btn btn-primary">Lấy
+                                hàng
+                            </button>
+                        </a>
+                    </div>
+                    <div>
+                        <button th:if="${invoice.status == 3 || invoice.status == 4}" class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target='#historyModal'>Lịch sử
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 5}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ xác nhận</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Xác nhận đơn hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ lấy hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ vận chuyển</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Giao hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a th:href="@{/employee/order/shipping/{id}(id=${invoice.id})}">
+                            <button class="btn btn-primary">Vận chuyển</button>
+                        </a>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target='#historyModal'>Lịch sử
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 6}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ xác nhận</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Xác nhận đơn hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ lấy hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ vận chuyển</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Giao hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a th:href="@{/employee/order/delivery/{id}(id=${invoice.id})}">
+                            <button class="btn btn-primary">Giao hàng</button>
+                        </a>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target='#historyModal'>Lịch sử
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 7}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ xác nhận</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Xác nhận đơn hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ lấy hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ vận chuyển</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Giao hàng</h4>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a th:href="@{/employee/order/completed/{id}(id=${invoice.id})}">
+                            <button class="btn btn-primary">Hoàn thành</button>
+                        </a>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target='#historyModal'>Lịch sử
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" th:if="${invoice.status == 8}">
+                <div class="steps d-flex flex-wrap flex-sm-nowrap justify-content-between padding-top-2x padding-bottom-1x">
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ xác nhận</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Xác nhận đơn hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-cart"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ lấy hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Chờ vận chuyển</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Giao hàng</h4>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-icon-wrap">
+                            <div class="step-icon"><i class="pe-7s-check"></i></div>
+                        </div>
+                        <h4 class="step-title">Hoàn thành</h4>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a>
+                            <button class="btn btn-primary">Trả hàng</button>
+                        </a>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target='#historyModal'>Lịch sử
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card" style="margin-bottom: 13px">
+        <div class="card-header bg-white">
+            <h4>Lịch sử thanh toán</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Mã giao dịch</th>
+                    <th>Phương thức thanh toán</th>
+                    <th>Số tiền thanh toán</th>
+                    <th>Thời gian</th>
+                    <th>Ghi chú</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="historyPayment, stt : ${invoice.paymentHistories}">
+                    <td>[[${stt.index+1}]]</td>
+                    <td>[[${historyPayment.transactionCode}]]</td>
+                    <td>[[${historyPayment.paymentMethod.name}]]</td>
+                    <td>[[${historyPayment.amountPaid}]]</td>
+                    <td>[[${#temporals.format(historyPayment.paymentDate, 'dd/MM/yyyy HH:mm')}]]</td>
+                    <td>[[${historyPayment.note}]]</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Card hiển thị danh sách hóa đơn -->
+    <div class="card" style="margin-top: 13px">
+        <div class="card-header bg-white">
+            <h4>Thông tin sản phẩm</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="detail, stt : ${invoiceDetail}">
+                    <td th:text="${stt.index + 1}"></td>
+                    <td th:if="${detail.productDetail.product.images.size() > 0}">
+                        <div class="flex-shrink-0">
+                            <img th:src="${detail.productDetail.product.images[0].imageUrl}"
+                                 alt="Ảnh sản phẩm" width="35"
+                                 class="img-fluid"/>
+                        </div>
+                    </td>
+                    <td th:if="${detail.productDetail.product.images.size() <= 0}">
+                        <div class="flex-shrink-0">
+                            <img src="" alt="Ảnh mặc định" width="35" class="img-fluid"/>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex-lg-grow-1 ms-3">
+                            <h6 class="small mb-0"><a href="#" class="text-reset">[[${detail.productDetail.product.name}]]</a>
+                            </h6>
+                            <span class="small">Màu sắc: [[${detail.productDetail.color.name}]],</span>
+                            <span class="small">Kích cỡ: [[${detail.productDetail.size.name}]]</span>
+                        </div>
+                    </td>
+                    <td>[[${detail.quantity}]]</td>
+                    <td>[[${detail.unitPrice}]]</td>
+                    <td>[[${detail.finalPrice}]]</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal hiển thị lịch sử -->
+    <div id="historyModal" class="modal fade" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historyModalLabel">Lịch sử thay đổi trạng thái đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Trạng thái cũ</th>
+                            <th>Trạng thái mới</th>
+                            <th>Người cập nhật</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Hiển thị danh sách lịch sử -->
+                        <tr th:each="history : ${invoice.statusHistories}">
+                            <td th:text="${#temporals.format(history.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:if="${history.previousStatus == null}" th:text="${history.previousStatus}"></td>
+                            <td th:if="${history.previousStatus == 3}">Chờ xác nhận</td>
+                            <td th:if="${history.previousStatus == 4}">Xác nhận</td>
+                            <td th:if="${history.previousStatus == 5}">Chờ lấy hàng</td>
+                            <td th:if="${history.previousStatus == 6}">Chờ vận chuyển</td>
+                            <td th:if="${history.previousStatus == 7}">Giao hàng</td>
+                            <td th:if="${history.previousStatus == 8}">Hoàn thành</td>
+                            <td th:if="${history.newStatus == 3}">Chờ xác nhận</td>
+                            <td th:if="${history.newStatus == 4}">Xác nhận</td>
+                            <td th:if="${history.newStatus == 5}">Chờ lấy hàng</td>
+                            <td th:if="${history.newStatus == 6}">Chờ vận chuyển</td>
+                            <td th:if="${history.newStatus == 7}">Giao hàng</td>
+                            <td th:if="${history.newStatus == 8}">Hoàn thành</td>
+                            <td th:text="${history.updatedBy != null ? history.updatedBy.name : 'Hệ thống'}"></td>
+                            <td th:text="${history.note != null ? history.note : 'Không có'}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

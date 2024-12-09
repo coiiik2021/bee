@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{/admin/template}" >
+<head>
+    <title>Bán hàng tại quầy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <meta charset="UTF-8">
+    <title>Trang chủ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card-header div {
+            text-align: center;
+        }
+        .card-header div i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .card-header div p {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .card-header div span {
+            display: block;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .card-header div span i {
+            color: #28a745;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .chart-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .chart-footer div {
+            text-align: center;
+        }
+        .chart-footer div p {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chart-footer div span {
+            display: block;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .chart-footer div select,
+        .chart-footer div input {
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .card-header, .chart-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .card-header div, .chart-footer div {
+                margin-bottom: 10px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <main class="content px-3 py-4" layout:fragment="main" >
+        <div class="header">Trang chủ</div><hr>
+        <div class="container mt-4">
+        <div class="card mb-4 " style="height: 120px ;">
+            <div class="card-body">
+                <div class="row text-center">
+
+                    <div class="col-md-3 d-flex flex-column align-items-center border-end">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">TẠI QUẦY</p>
+                                <span>0đ</span>
+                                <div class="d-flex" style="gap: 10px;">
+                                    <small>0 đơn</small>
+                                    <small style="color: #7ACCBC;background-color: #D8FFF8">0%</small>
+                                </div>
+                            </div>
+                            <i class="fas fa-store fs-4"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 d-flex flex-column align-items-center border-end">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">BÁN ONLINE</p>
+                                <span>0đ</span>
+                                <div class="d-flex" style="gap: 10px;">
+                                    <small>0 đơn</small>
+                                    <small style="color: #7ACCBC;background-color: #D8FFF8">0%</small>
+                                </div>
+                            </div>
+                            <i class="fas fa-shopping-cart fs-4"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 d-flex flex-column align-items-center border-end">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">ĐƠN HÀNG</p>
+                                <span>0 đơn</span>
+                            </div>
+                            <i class="fas fa-box fs-4"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 d-flex flex-column align-items-center ">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">DOANH THU TỔNG</p>
+                                <span>0đ</span>
+                                <div class="d-flex" style="gap: 10px;">
+                                    <small>0 đơn</small>
+                                    <small style="color: #7ACCBC;background-color: #D8FFF8">0%</small>
+                                </div>
+                            </div>
+                            <i class="fas fa-wallet fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="fw-semibold fs-6">Bán Hàng</div>
+
+                        <div class="d-flex" style="gap: 10px;">
+                            <select class="form-control mr-2">
+                                <option>Tại quầy</option>
+                                <option>Bán online</option>
+                            </select>
+                            <input type="date" class="form-control" value="2024-06-05">
+                        </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salesChart" style="height: 400px; width: 100%;"></canvas>
+
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 24 }, (_, i) => i), // 0-23
+                    datasets: [
+                        {
+                            label: 'Hôm Qua',
+                            data: Array.from({ length: 24 }, () => 0),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: true,
+                        },
+                        {
+                            label: 'Hôm Nay',
+                            data: Array.from({ length: 24 }, () => 0),
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Giờ'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Doanh thu (đ)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    </main>
+</body>
+</html>

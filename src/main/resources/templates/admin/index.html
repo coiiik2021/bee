@@ -1,105 +1,445 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{/admin/template}" >
 <head>
+    <title>Bán hàng tại quầy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+
+    <!-- Bootstrap 5.3.2 CSS -->
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+    />
+    <!-- Font Awesome -->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <title>Trang chủ</title>
     <style>
-
-        .order-card {
-            color: #fff;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
         }
-
-        .bg-c-blue {
-            background: linear-gradient(45deg,#4099ff,#73b4ff);
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 0;
         }
-
-        .bg-c-green {
-            background: linear-gradient(45deg,#2ed8b6,#59e0c5);
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
-
-        .bg-c-yellow {
-            background: linear-gradient(45deg,#FFB64D,#ffcb80);
-        }
-
-        .bg-c-pink {
-            background: linear-gradient(45deg,#FF5370,#ff869a);
-        }
-
-
         .card {
-            border-radius: 5px;
-            -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
-            box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
-            border: none;
-            margin-bottom: 30px;
-            -webkit-transition: all 0.3s ease-in-out;
-            transition: all 0.3s ease-in-out;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card-header div {
+            text-align: center;
+        }
+        .card-header div i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .card-header div p {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .card-header div span {
+            display: block;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .card-header div span i {
+            color: #28a745;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .chart-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .chart-footer div {
+            text-align: center;
+        }
+        .chart-footer div p {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chart-footer div span {
+            display: block;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .chart-footer div select,
+        .chart-footer div input {
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .card-header, .chart-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .card-header div, .chart-footer div {
+                margin-bottom: 10px;
+            }
         }
 
-        .card .card-block {
-            padding: 25px;
+        .container1 {
+            margin-top: 50px;
         }
 
-        .order-card i {
-            font-size: 26px;
+        .card1 {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
         }
 
-        .f-left {
-            float: left;
+        .card-header1 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
         }
 
-        .f-right {
-            float: right;
+        .chart-container1 {
+            position: relative;
+            height: 300px;
         }
     </style>
 
 </head>
 <body>
     <main class="content px-3 py-4" layout:fragment="main" >
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-4 col-xl-3">
-                    <div class="card bg-c-blue order-card">
-                        <div class="card-block">
-                            <h6 class="m-b-20">Orders Received</h6>
-                            <h2 class="text-right"><i class="fa fa-cart-plus f-left"></i><span>486</span></h2>
-                            <p class="m-b-0">Completed Orders<span class="f-right">351</span></p>
+        <div class="header">Trang chủ</div><hr>
+        <div class="container mt-4">
+        <div class="card mb-4 " style="height: 120px ;">
+            <div class="card-body">
+                <div class="row text-center">
+
+                    <div class="col-md-3 d-flex flex-column align-items-center border-end">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">TẠI QUẦY</p>
+                                <span th:text="${offline[1]} + 'đ'" ></span>
+                                <div class="d-flex" style="gap: 10px;">
+                                    <small th:text="${offline[0]}"></small>
+                                    <small style="color: #7ACCBC;" th:text="${tile[1]} + '%'"></small>
+                                </div>
+                            </div>
+                            <i class="fas fa-store fs-4"></i>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-4 col-xl-3">
-                    <div class="card bg-c-green order-card">
-                        <div class="card-block">
-                            <h6 class="m-b-20">Orders Received</h6>
-                            <h2 class="text-right"><i class="fa fa-rocket f-left"></i><span>486</span></h2>
-                            <p class="m-b-0">Completed Orders<span class="f-right">351</span></p>
+                    <div class="col-md-3 d-flex flex-column align-items-center border-end">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">BÁN ONLINE</p>
+                                <span th:text="${online[1]} +'đ'"></span>
+                                <div class="d-flex" style="gap: 10px;">
+                                    <small th:text="${online[0]}"></small>
+                                    <small style="color: #7ACCBC;" th:text="${tile[0]} +'%'">0%</small>
+                                </div>
+                            </div>
+                            <i class="fas fa-shopping-cart fs-4"></i>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-4 col-xl-3">
-                    <div class="card bg-c-yellow order-card">
-                        <div class="card-block">
-                            <h6 class="m-b-20">Orders Received</h6>
-                            <h2 class="text-right"><i class="fa fa-refresh f-left"></i><span>486</span></h2>
-                            <p class="m-b-0">Completed Orders<span class="f-right">351</span></p>
+                    <div class="col-md-3 d-flex flex-column align-items-center border-end">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">ĐƠN HÀNG</p>
+                                <span th:text="${total[0]}"></span>
+                            </div>
+                            <i class="fas fa-box fs-4"></i>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-4 col-xl-3">
-                    <div class="card bg-c-pink order-card">
-                        <div class="card-block">
-                            <h6 class="m-b-20">Orders Received</h6>
-                            <h2 class="text-right"><i class="fa fa-credit-card f-left"></i><span>486</span></h2>
-                            <p class="m-b-0">Completed Orders<span class="f-right">351</span></p>
+                    <div class="col-md-3 d-flex flex-column align-items-center ">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div class="d-flex flex-column align-items-start">
+                                <p style="color: #95999c; font-size: 14px;">DOANH THU TỔNG</p>
+                                <span th:text="${total[1]}+'đ'">đ</span>
+                                <div class="d-flex" style="gap: 10px;">
+                                    <small th:text="${total[0]}">0 đơn</small>
+                                    <small style="color: #7ACCBC;" th:text="${tile[2]} + '%'"></small>
+
+                                </div>
+                            </div>
+                            <i class="fas fa-wallet fs-4"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="fw-semibold fs-6">Bán Hàng</div>
+                    <div class="d-flex" style="gap: 10px;">
+                        <select id="salesType" class="form-control mr-2">
+                            <option value="offline">Tại quầy</option>
+                            <option value="online">Bán online</option>
+                        </select>
+                        <input id="salesDate" type="date" class="form-control" value="2024-06-05">
+                    </div>
+                </div>
+                <div class="d-flex" style="gap: 20px; flex-wrap: wrap;">
+                    <!-- Biểu đồ cột -->
+                    <div class="chart-container" style="flex: 1 1 48%; max-width: 48%;">
+                        <canvas id="salesChart" style="height: 300px; width: 100%;"></canvas>
+                    </div>
+                    <!-- Biểu đồ tròn -->
+                    <div class="chart-container1" style="flex: 1 1 48%; max-width: 48%;">
+                        <canvas id="pieChart1" style="height: 300px; width: 100%;"></canvas>
+                    </div>
+                </div>
+
+                <strong>Sản phẩm bán chạy</strong>
+                <table id="topSellingProductsTable" border="1">
+                    <!-- Bảng sẽ được cập nhật từ script -->
+                </table>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+            <script>
+                // Hàm fetch danh sách sản phẩm bán chạy
+                async function fetchTopSellingProducts(limit) {
+                    try {
+                        const response = await fetch(`/doanhthu/banchay?limit=${limit}`);
+                        const productCountMap = await response.json(); // Dữ liệu trả về từ server
+
+                        // Hiển thị danh sách sản phẩm dưới dạng bảng
+                        const productTable = document.getElementById("topSellingProductsTable");
+                        productTable.innerHTML = ""; // Xóa bảng cũ
+
+                        // Tạo tiêu đề cho bảng
+                        const tableHeader = document.createElement("thead");
+                        tableHeader.innerHTML = `
+                <tr>
+                    <th>Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Số lượng bán</th>
+                    <th>Giá</th>
+                </tr>
+            `;
+                        productTable.appendChild(tableHeader);
+
+                        // Tạo phần thân bảng
+                        const tableBody = document.createElement("tbody");
+
+                        // Duyệt qua danh sách sản phẩm bán chạy
+                        productCountMap.forEach(product => {
+                            const row = document.createElement("tr");
+
+                            // Tạo thẻ img để hiển thị hình ảnh sản phẩm
+                            const imageCell = document.createElement("td");
+                            const imageElement = document.createElement("img");
+                            imageElement.src = product.image; // Đặt nguồn ảnh
+                            imageElement.alt = product.name; // Thêm tên sản phẩm vào alt cho ảnh
+                            imageElement.style.width = "100px"; // Đặt kích thước ảnh nếu cần
+                            imageElement.style.height = "100px"; // Đặt kích thước ảnh nếu cần
+                            imageCell.appendChild(imageElement);
+
+                            // Tạo các ô dữ liệu cho tên, số lượng bán và giá
+                            const nameCell = document.createElement("td");
+                            nameCell.textContent = product.name;
+
+                            const quantityCell = document.createElement("td");
+                            quantityCell.textContent = product.sl;
+
+                            const priceCell = document.createElement("td");
+                            priceCell.textContent = product.price;
+
+                            // Thêm các ô vào dòng
+                            row.appendChild(imageCell);
+                            row.appendChild(nameCell);
+                            row.appendChild(quantityCell);
+                            row.appendChild(priceCell);
+
+                            // Thêm dòng vào thân bảng
+                            tableBody.appendChild(row);
+                        });
+
+                        // Thêm thân bảng vào bảng chính
+                        productTable.appendChild(tableBody);
+                    } catch (error) {
+                        console.error("Lỗi khi tải danh sách sản phẩm bán chạy:", error);
+                    }
+                }
+
+                // Gọi hàm lấy danh sách sản phẩm bán chạy với giới hạn 5 sản phẩm
+                fetchTopSellingProducts(5);
+            </script>
+
+
+
+
+
+        </div>
+        <script>
+            const ctx = document.getElementById('salesChart').getContext('2d');
+
+            // Tạo biểu đồ ban đầu
+            const salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // Sẽ được cập nhật từ API
+                    datasets: [
+                        {
+                            label: 'Doanh số',
+                            data: [], // Sẽ được cập nhật từ API
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Ngày trong tháng'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Doanh thu (đ)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Hàm fetch dữ liệu từ RestController
+            async function fetchMonthlySales(month, year, type) {
+                try {
+                    const response = await fetch(`/doanhthu?month=${month}&year=${year}&type=${type}`);
+                    const data = await response.json();
+
+                    // Cập nhật dữ liệu cho biểu đồ
+                    salesChart.data.labels = data.labels; // Mảng ngày [1, 2, ..., 31]
+                    salesChart.data.datasets[0].data = data.sales; // Mảng doanh thu
+                    salesChart.update(); // Cập nhật biểu đồ
+                } catch (error) {
+                    console.error('Lỗi khi lấy dữ liệu:', error);
+                }
+            }
+
+            // Lấy giá trị tháng, năm và loại bán hàng từ người dùng
+            function updateSalesChart() {
+                const dateInput = document.getElementById('salesDate').value;
+                const salesType = document.getElementById('salesType').value;
+
+                // Chuyển ngày thành tháng và năm
+                const selectedDate = new Date(dateInput);
+                const month = selectedDate.getMonth() + 1; // Tháng (1-12)
+                const year = selectedDate.getFullYear(); // Năm
+
+                // Gọi hàm fetch dữ liệu
+                fetchMonthlySales(month, year, salesType);
+            }
+
+            // Lắng nghe sự kiện thay đổi
+            document.getElementById('salesDate').addEventListener('change', updateSalesChart);
+            document.getElementById('salesType').addEventListener('change', updateSalesChart);
+
+            // Gọi hàm fetch dữ liệu lần đầu (tháng hiện tại)
+            updateSalesChart();
+
+        </script>
+        <script>
+            // Ensure you are using the right chart data
+            const ctxPie = document.getElementById('pieChart1').getContext('2d');
+
+            // Create Pie Chart with empty data (we'll update this after fetching data)
+            const pieChart = new Chart(ctxPie, {
+                type: 'pie', // or 'doughnut' if you want a doughnut chart
+                data: {
+                    labels: ['Offline', 'Online'], // Label for each section
+                    datasets: [{
+                        label: 'Sales Distribution',
+                        data: [0, 0], // Initially empty, will update after fetch
+                        backgroundColor: ['#FF5733', '#33FF57'], // Colors for the slices
+                        borderColor: ['#FF5733', '#33FF57' ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Fetch data from the controller
+            fetch('/doanhthu/tileOnline')  // Call your API
+                .then(response => response.json())
+                .then(data => {
+                    // Update chart with data from the controller
+                    const offline = data.offline;
+                    const online = data.online;
+
+                    // Update the chart data
+                    pieChart.data.datasets[0].data = [offline, online];
+                    pieChart.update();  // Re-render the chart with updated data
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        </script>
+
+
     </main>
 </body>
 </html>

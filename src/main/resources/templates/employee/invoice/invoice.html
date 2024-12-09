@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{/employee/template}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lí hoá đơn</title>
+    <style>
+        th, td {
+            text-align: center; /* Căn giữa theo chiều ngang */
+        }
+        /* CSS */
+        .status-badge {
+            min-width: 120px; /* Đặt độ rộng tối thiểu */
+            text-align: center; /* Căn giữa nội dung */
+            display: inline-block; /* Đảm bảo chiều rộng áp dụng */
+        }
+        .icon-large {
+            font-size: 1.5rem; /* Tăng kích thước biểu tượng */
+            margin-right: 7px; /* Khoảng cách giữa các biểu tượng */
+            margin-left: 7px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<main class="content px-3 py-4" layout:fragment="main">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/employee/dashboard}">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Xác nhận đơn hàng</li>
+        </ol>
+    </nav>
+
+    <!-- Card tìm kiếm hóa đơn -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Tìm kiếm hóa đơn</h5>
+        </div>
+        <div class="card-body">
+            <form class="row g-3">
+                <div class="col-md-4">
+                    <label for="invoiceCode" class="form-label">Mã hóa đơn</label>
+                    <input type="text" class="form-control" id="invoiceCode" placeholder="Nhập mã hóa đơn">
+                </div>
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Từ ngày</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">Đến ngày</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+                <div class="col-md-12 text-center">
+                    <button type="submit" class="btn btn-primary mt-3 px-4 py-2">Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <!-- Navigation Tabs for Invoice Status -->
+        <ul class="nav nav-tabs" id="invoiceStatusTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab" aria-controls="paid" aria-selected="true">Tất cả</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing" type="button" role="tab" aria-controls="processing" aria-selected="false">Chưa thanh toán</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="canceled" aria-selected="false">Đã thanh toán</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="canceled-tab" data-bs-toggle="tab" data-bs-target="#canceled" type="button" role="tab" aria-controls="canceled" aria-selected="false">Đã huỷ</button>
+            </li>
+        </ul>
+
+        <!-- Tab Content for Invoice Status -->
+        <div class="tab-content" id="invoiceStatusTabContent">
+            <div class="tab-pane fade show active" id="paid" role="tabpanel" aria-labelledby="paid-tab">
+                <h4 class="mt-3">Danh sách hóa đơn</h4>
+                <!-- Nội dung hóa đơn đã thanh toán -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Hoá đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Mã theo dõi đơn hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Người tạo</th>
+                        <th>Hình thức</th>
+                        <th>Thời gian tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hd, stt : ${listInvoice}">
+                        <td th:text="${stt.index + 1}"></td>
+                        <td th:text="${hd.id}"></td>
+                        <td th:text="${hd.customer != null ? hd.customer.fullname : 'N/A'}"></td>
+                        <td th:text="${hd.invoiceTrackingNumber != null ? hd.invoiceTrackingNumber : 'N/A'}"></td>
+                        <td th:text="${hd.finalPrice != null ? T(com.beehat.service.CurrencyUtil).formatCurrency(hd.finalPrice) : null}">0 VND</td>
+                        <td th:text="${hd.employee != null ? hd.employee.fullname : 'N/A'}"></td>
+                        <td>
+                            <span th:if="${hd.invoiceStatus == 0}" class="badge text-bg-secondary">Tại quầy</span>
+                            <span th:if="${hd.invoiceStatus == 1}" class="badge bg-danger">Bán online</span>
+                        </td>
+                        <td th:text="${hd.createdDate != null ? #temporals.format(hd.createdDate, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+
+                        <td>
+                            <span th:if="${hd.status == 0}" class="badge rounded-pill bg-info status-badge">Chưa thanh toán</span>
+                            <span th:if="${hd.status == 1}" class="badge rounded-pill bg-danger status-badge">Bị huỷ</span>
+                            <span th:if="${hd.status == 2}" class="badge rounded-pill bg-success status-badge">Đã thanh toán</span>
+                            <span th:if="${hd.status == 3}" class="badge rounded-pill bg-primary status-badge">Chờ xác nhận</span>
+                            <span th:if="${hd.status == 4}" class="badge rounded-pill bg-primary status-badge">Xác nhận</span>
+                            <span th:if="${hd.status == 5}" class="badge rounded-pill bg-primary status-badge">Chờ lấy hàng</span>
+                            <span th:if="${hd.status == 6}" class="badge rounded-pill bg-primary status-badge">Chờ vận chuyển</span>
+                            <span th:if="${hd.status == 7}" class="badge rounded-pill bg-primary status-badge">Giao hàng</span>
+                            <span th:if="${hd.status == 8}" class="badge rounded-pill bg-primary status-badge">Hoàn thành</span>
+                        </td>
+                        <td colspan="2" style="display: flex; align-items: center; justify-content: center;">
+                            <a class="text-no-decoration" th:href="@{/employee/order/view-invoice/{id}(id=${hd.id})}"><i class="ph ph-info icon-large text-primary"></i></a>
+                            <a class="text-no-decoration" href="#"><i class="ph ph-note-pencil icon-large text-success"></i></a>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="processing" role="tabpanel" aria-labelledby="processing-tab">
+                <h4 class="mt-3">Danh sách hóa đơn chưa thanh toán</h4>
+                <!-- Nội dung hóa đơn đang xử lý -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Hoá đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Mã theo dõi đơn hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Người tạo</th>
+                        <th>Hình thức</th>
+                        <th>Thời gian tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hd, stt : ${listInvoiceProcessing}">
+                        <td th:text="${stt.index + 1}"></td>
+                        <td th:text="${hd.id}"></td>
+                        <td th:text="${hd.customer != null ? hd.customer.fullname : 'N/A'}"></td>
+                        <td th:text="${hd.invoiceTrackingNumber != null ? hd.invoiceTrackingNumber : 'N/A'}"></td>
+                        <td th:text="${hd.finalPrice != null ? T(com.beehat.service.CurrencyUtil).formatCurrency(hd.finalPrice) : null}">0 VND</td>
+                        <td th:text="${hd.employee != null ? hd.employee.fullname : 'N/A'}"></td>
+                        <td>
+                            <span th:if="${hd.invoiceStatus == 0}" class="badge text-bg-secondary">Tại quầy</span>
+                            <span th:if="${hd.invoiceStatus == 1}" class="badge bg-danger">Bán online</span>
+                        </td>
+                        <td th:text="${hd.createdDate != null ? #temporals.format(hd.createdDate, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+
+                        <td>
+                            <span th:if="${hd.status == 0}" class="badge rounded-pill bg-info status-badge">Chưa thanh toán</span>
+                            <span th:if="${hd.status == 1}" class="badge rounded-pill bg-danger status-badge">Bị huỷ</span>
+                            <span th:if="${hd.status == 2}" class="badge rounded-pill bg-success status-badge">Đã thanh toán</span>
+                        </td>
+                        <td colspan="2" style="display: flex; align-items: center; justify-content: center;">
+                            <a class="text-no-decoration" th:href="@{/employee/order/view-invoice/{id}(id=${hd.id})}"><i class="ph ph-info icon-large text-primary"></i></a>
+                            <a class="text-no-decoration" href="#"><i class="ph ph-note-pencil icon-large text-success"></i></a>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                <h4 class="mt-3">Danh sách hóa đơn đã thanh toán</h4>
+                <!-- Nội dung hóa đơn đã hủy -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Hoá đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Mã theo dõi đơn hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Người tạo</th>
+                        <th>Hình thức</th>
+                        <th>Thời gian tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hd, stt : ${listInvoiceCompleted}">
+                        <td th:text="${stt.index + 1}"></td>
+                        <td th:text="${hd.id}"></td>
+                        <td th:text="${hd.customer != null ? hd.customer.fullname : 'N/A'}"></td>
+                        <td th:text="${hd.invoiceTrackingNumber != null ? hd.invoiceTrackingNumber : 'N/A'}"></td>
+                        <td th:text="${hd.finalPrice != null ? T(com.beehat.service.CurrencyUtil).formatCurrency(hd.finalPrice) : null}">0 VND</td>
+                        <td th:text="${hd.employee != null ? hd.employee.fullname : 'N/A'}"></td>
+                        <td>
+                            <span th:if="${hd.invoiceStatus == 0}" class="badge text-bg-secondary">Tại quầy</span>
+                            <span th:if="${hd.invoiceStatus == 1}" class="badge bg-danger">Bán online</span>
+                        </td>
+                        <td th:text="${hd.createdDate != null ? #temporals.format(hd.createdDate, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+
+                        <td>
+                            <span th:if="${hd.status == 0}" class="badge rounded-pill bg-info status-badge">Chưa thanh toán</span>
+                            <span th:if="${hd.status == 1}" class="badge rounded-pill bg-danger status-badge">Bị huỷ</span>
+                            <span th:if="${hd.status == 2}" class="badge rounded-pill bg-success status-badge">Đã thanh toán</span>
+                        </td>
+                        <td colspan="2" style="display: flex; align-items: center; justify-content: center;">
+                            <a class="text-no-decoration" th:href="@{/employee/order/view-invoice/{id}(id=${hd.id})}"><i class="ph ph-info icon-large text-primary"></i></a>
+                            <a class="text-no-decoration" href="#"><i class="ph ph-note-pencil icon-large text-success"></i></a>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="canceled" role="tabpanel" aria-labelledby="canceled-tab">
+                <h4 class="mt-3">Danh sách hóa đơn đã huỷ</h4>
+                <!-- Nội dung hóa đơn đã hủy -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Hoá đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Mã theo dõi đơn hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Người tạo</th>
+                        <th>Hình thức</th>
+                        <th>Thời gian tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hd, stt : ${listInvoiceCanceled}">
+                        <td th:text="${stt.index + 1}"></td>
+                        <td th:text="${hd.id}"></td>
+                        <td th:text="${hd.customer != null ? hd.customer.fullname : 'N/A'}"></td>
+                        <td th:text="${hd.invoiceTrackingNumber != null ? hd.invoiceTrackingNumber : 'N/A'}"></td>
+                        <td th:text="${hd.finalPrice != null ? T(com.beehat.service.CurrencyUtil).formatCurrency(hd.finalPrice) : null}">0 VND</td>
+                        <td th:text="${hd.employee != null ? hd.employee.fullname : 'N/A'}"></td>
+                        <td>
+                            <span th:if="${hd.invoiceStatus == 0}" class="badge text-bg-secondary">Tại quầy</span>
+                            <span th:if="${hd.invoiceStatus == 1}" class="badge bg-danger">Bán online</span>
+                        </td>
+                        <td th:text="${hd.createdDate != null ? #temporals.format(hd.createdDate, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+
+                        <td>
+                            <span th:if="${hd.status == 0}" class="badge rounded-pill bg-info status-badge">Chưa thanh toán</span>
+                            <span th:if="${hd.status == 1}" class="badge rounded-pill bg-danger status-badge">Bị huỷ</span>
+                            <span th:if="${hd.status == 2}" class="badge rounded-pill bg-success status-badge">Đã thanh toán</span>
+                        </td>
+                        <td colspan="2" style="display: flex; align-items: center; justify-content: center;">
+                            <a class="text-no-decoration" th:href="@{/employee/order/view-invoice/{id}(id=${hd.id})}"><i class="ph ph-info icon-large text-primary"></i></a>
+                            <a class="text-no-decoration" href="#"><i class="ph ph-note-pencil icon-large text-success"></i></a>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
