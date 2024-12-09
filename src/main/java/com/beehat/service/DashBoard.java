@@ -32,38 +32,37 @@ public class DashBoard {
         return new int[]{ paymentHistories.size(), total};
     }
 
-    public List<Integer> getDoanhThuTheoThang(int month, int year, String type) {
-        LocalDate startOfMonth = YearMonth.of(year, month).atDay(1);
-        LocalDate endOfMonth = YearMonth.of(year, month).atEndOfMonth();
+    public List<Integer> getDoanhThuTheoNam(int year, String type) {
+        List<Integer> monthlySales = new ArrayList<>(Collections.nCopies(12, 0)); // Khởi tạo danh sách 12 tháng
 
-        int daysInMonth = endOfMonth.getDayOfMonth();
-        List<Integer> doanhThuTheoNgay = new ArrayList<>(Collections.nCopies(daysInMonth, 0));
-        boolean isOnline = type.equals("online");
+        // Lặp qua các tháng trong năm
+        for (int month = 1; month <= 12; month++) {
+            LocalDate startOfMonth = YearMonth.of(year, month).atDay(1);
+            LocalDate endOfMonth = YearMonth.of(year, month).atEndOfMonth();
 
-        if(isOnline) {
-            paymentHistoryRepo.findAll().stream()
-                    .filter(payment ->  payment.getInvoice() != null &&
-                            !payment.getPaymentDate().toLocalDate().isBefore(startOfMonth) &&
-                                    !payment.getPaymentDate().toLocalDate().isAfter(endOfMonth))
-                    .forEach(payment -> {
-                        int day = payment.getPaymentDate().getDayOfMonth();
-                        int totalPrice = payment.getAmountPaid();
-                        doanhThuTheoNgay.set(day - 1, doanhThuTheoNgay.get(day - 1) + totalPrice);
-                    });
-        } else{
-            paymentHistoryRepo.findAll().stream()
-                    .filter(payment -> payment.getInvoice() == null &&
-                            !payment.getPaymentDate().toLocalDate().isBefore(startOfMonth) &&
-                                    !payment.getPaymentDate().toLocalDate().isAfter(endOfMonth))
-                    .forEach(payment -> {
-                        int day = payment.getPaymentDate().getDayOfMonth();
-                        int totalPrice = payment.getAmountPaid();
-                        doanhThuTheoNgay.set(day - 1, doanhThuTheoNgay.get(day - 1) + totalPrice);
-                    });
+            int totalSales = 0;
+
+            // Lọc dữ liệu thanh toán theo loại (online/offline) và ngày trong tháng
+            boolean isOnline = type.equals("online");
+            List<PaymentHistory> payments = paymentHistoryRepo.findAll().stream()
+                    .filter(payment -> !payment.getPaymentDate().toLocalDate().isBefore(startOfMonth) &&
+                            !payment.getPaymentDate().toLocalDate().isAfter(endOfMonth))
+                    .collect(Collectors.toList());
+
+            for (PaymentHistory payment : payments) {
+                boolean isValidType = (isOnline && payment.getInvoice() != null) || (!isOnline && payment.getInvoice() == null);
+                if (isValidType) {
+                    totalSales += payment.getAmountPaid();
+                }
+            }
+
+            // Gán doanh thu cho tháng tương ứng
+            monthlySales.set(month - 1, totalSales); // Gán doanh thu cho tháng (0-11)
         }
 
-        return doanhThuTheoNgay;
+        return monthlySales;
     }
+
 
 
 

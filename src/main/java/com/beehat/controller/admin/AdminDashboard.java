@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
@@ -40,32 +41,33 @@ public class AdminDashboard {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getMonthlySales(
-            @RequestParam int month,
-            @RequestParam int year,
+            @RequestParam String date,
             @RequestParam String type) {
 
-        // Lọc doanh thu theo loại bán hàng (online/offline)
-        List<Integer> sales = dashBoard.getDoanhThuTheoThang(month, year, type);
+        LocalDate selectedDate = LocalDate.parse(date);  // Chuyển đổi String thành LocalDate
+        int month = selectedDate.getMonthValue();        // Lấy tháng từ ngày
+        int year = selectedDate.getYear();
+        // Lấy doanh thu cho từng tháng trong năm
+        List<Integer> monthlySales = dashBoard.getDoanhThuTheoNam(year, type);
 
-        // Tạo danh sách nhãn (ngày từ 1 đến số ngày trong tháng)
-        int daysInMonth = YearMonth.of(year, month).lengthOfMonth();
-        List<Integer> labels = IntStream.rangeClosed(1, daysInMonth).boxed().collect(Collectors.toList());
+        // Tạo danh sách tháng trong năm
+        List<Integer> labels = IntStream.rangeClosed(1, 12).boxed().collect(Collectors.toList());
 
-        // Lấy doanh thu tổng cho biểu đồ tròn (ví dụ: phân loại doanh thu theo loại bán hàng)
-        int totalSales = sales.stream().mapToInt(Integer::intValue).sum();
-        List<Integer> salesByType = List.of(  // Giả sử bạn có các giá trị cho doanh thu online và offline
-                totalSales / 2,  // Ví dụ doanh thu online
-                totalSales / 2   // Ví dụ doanh thu offline
+        // Doanh thu theo loại (offline/online)
+        int totalSales = monthlySales.stream().mapToInt(Integer::intValue).sum();
+        List<Integer> salesByType = List.of(
+                totalSales / 2, // Ví dụ: Chia đều doanh thu cho online và offline
+                totalSales / 2
         );
 
-        // Kết quả trả về cho cả biểu đồ cột và biểu đồ tròn
         Map<String, Object> result = new HashMap<>();
-        result.put("labels", labels);
-        result.put("sales", sales);
-        result.put("salesByType", salesByType);  // Dữ liệu cho biểu đồ tròn
+        result.put("labels", labels); // Các tháng trong năm
+        result.put("sales", monthlySales); // Doanh thu theo từng tháng
+        result.put("salesByType", salesByType); // Doanh thu theo loại bán hàng
 
         return ResponseEntity.ok(result);
     }
+
 
     @GetMapping("/banchay")
     public ResponseEntity<List<ProductResponse>> getTopSellingProducts(

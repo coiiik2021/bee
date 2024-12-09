@@ -55,6 +55,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            background-color: white;
         }
         .card-header div {
             text-align: center;
@@ -71,7 +72,7 @@
         .card-header div span {
             display: block;
             font-size: 14px;
-            color: #6c757d;
+            color: #fff;
         }
         .card-header div span i {
             color: #28a745;
@@ -97,7 +98,7 @@
         .chart-footer div span {
             display: block;
             font-size: 14px;
-            color: #6c757d;
+            color: #ffffff;
         }
         .chart-footer div select,
         .chart-footer div input {
@@ -137,6 +138,20 @@
             position: relative;
             height: 300px;
         }
+        .d-flex.chart-container-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* Đẩy các phần tử ra xa nhau */
+            align-items: flex-start;
+            gap: 20px; /* Khoảng cách giữa các phần tử */
+        }
+
+        .chart-container, .chart-container1 {
+            flex: 1 1 calc(50% - 20px); /* Chia mỗi biểu đồ chiếm 50% chiều rộng, trừ đi khoảng cách */
+            max-width: calc(50% - 20px);
+            margin: 0; /* Bỏ margin thừa */
+        }
+
     </style>
 
 </head>
@@ -144,7 +159,7 @@
     <main class="content px-3 py-4" layout:fragment="main" >
         <div class="header">Trang chủ</div><hr>
         <div class="container mt-4">
-        <div class="card mb-4 " style="height: 120px ;">
+        <div class="card mb-4 " style="height: 150px ;">
             <div class="card-body">
                 <div class="row text-center">
 
@@ -205,8 +220,8 @@
         </div>
 
 
-            <div class="card">
-                <div class="card-header">
+            <div class="card" >
+                <div class="card-header" >
                     <div class="fw-semibold fs-6">Bán Hàng</div>
                     <div class="d-flex" style="gap: 10px;">
                         <select id="salesType" class="form-control mr-2">
@@ -216,16 +231,17 @@
                         <input id="salesDate" type="date" class="form-control" value="2024-06-05">
                     </div>
                 </div>
-                <div class="d-flex" style="gap: 20px; flex-wrap: wrap;">
+                <div class="d-flex chart-container-wrapper">
                     <!-- Biểu đồ cột -->
-                    <div class="chart-container" style="flex: 1 1 48%; max-width: 48%;">
+                    <div class="chart-container">
                         <canvas id="salesChart" style="height: 300px; width: 100%;"></canvas>
                     </div>
                     <!-- Biểu đồ tròn -->
-                    <div class="chart-container1" style="flex: 1 1 48%; max-width: 48%;">
+                    <div class="chart-container1" style="padding-left: 180px;">
                         <canvas id="pieChart1" style="height: 300px; width: 100%;"></canvas>
                     </div>
                 </div>
+
 
                 <strong>Sản phẩm bán chạy</strong>
                 <table id="topSellingProductsTable" border="1">
@@ -313,15 +329,15 @@
         <script>
             const ctx = document.getElementById('salesChart').getContext('2d');
 
-            // Tạo biểu đồ ban đầu
+            // Tạo biểu đồ doanh thu theo tháng
             const salesChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [], // Sẽ được cập nhật từ API
+                    labels: [], // Sẽ được cập nhật từ API (các tháng trong năm)
                     datasets: [
                         {
-                            label: 'Doanh số',
-                            data: [], // Sẽ được cập nhật từ API
+                            label: 'Doanh thu theo tháng',
+                            data: [], // Doanh thu theo tháng sẽ được cập nhật từ API
                             borderColor: 'rgba(54, 162, 235, 1)',
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
                             fill: true,
@@ -339,13 +355,13 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Ngày trong tháng'
+                                text: 'Tháng trong năm'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Doanh thu (đ)'
+                                text: 'Doanh thu (VNĐ)'
                             },
                             beginAtZero: true
                         }
@@ -354,41 +370,35 @@
             });
 
             // Hàm fetch dữ liệu từ RestController
-            async function fetchMonthlySales(month, year, type) {
+            async function fetchYearlySales(year, type) {
                 try {
-                    const response = await fetch(`/doanhthu?month=${month}&year=${year}&type=${type}`);
+                    const response = await fetch(`/doanhthu?date=${year}&type=${type}`);
                     const data = await response.json();
 
                     // Cập nhật dữ liệu cho biểu đồ
-                    salesChart.data.labels = data.labels; // Mảng ngày [1, 2, ..., 31]
-                    salesChart.data.datasets[0].data = data.sales; // Mảng doanh thu
+                    salesChart.data.labels = data.labels; // Các tháng trong năm
+                    salesChart.data.datasets[0].data = data.sales; // Doanh thu theo tháng
                     salesChart.update(); // Cập nhật biểu đồ
                 } catch (error) {
                     console.error('Lỗi khi lấy dữ liệu:', error);
                 }
             }
 
-            // Lấy giá trị tháng, năm và loại bán hàng từ người dùng
+            // Lấy giá trị năm và loại bán hàng từ người dùng
             function updateSalesChart() {
-                const dateInput = document.getElementById('salesDate').value;
+                const yearInput = document.getElementById('salesDate').value;
                 const salesType = document.getElementById('salesType').value;
 
-                // Chuyển ngày thành tháng và năm
-                const selectedDate = new Date(dateInput);
-                const month = selectedDate.getMonth() + 1; // Tháng (1-12)
-                const year = selectedDate.getFullYear(); // Năm
-
                 // Gọi hàm fetch dữ liệu
-                fetchMonthlySales(month, year, salesType);
+                fetchYearlySales(yearInput, salesType);
             }
 
             // Lắng nghe sự kiện thay đổi
             document.getElementById('salesDate').addEventListener('change', updateSalesChart);
             document.getElementById('salesType').addEventListener('change', updateSalesChart);
 
-            // Gọi hàm fetch dữ liệu lần đầu (tháng hiện tại)
+            // Gọi hàm fetch dữ liệu lần đầu (năm hiện tại)
             updateSalesChart();
-
         </script>
         <script>
             // Ensure you are using the right chart data
