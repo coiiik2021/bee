@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,39 +33,38 @@ public class DashBoard {
         return new int[]{ paymentHistories.size(), total};
     }
 
-    public List<Integer> getDoanhThuTheoThang(int month, int year, String type) {
-        LocalDate startOfMonth = YearMonth.of(year, month).atDay(1);
-        LocalDate endOfMonth = YearMonth.of(year, month).atEndOfMonth();
+    public Map<String, List<Integer>> getDoanhThuTongHop(LocalDate startDate, LocalDate endDate) {
+        // Số ngày giữa startDate và endDate
+        int daysInRange = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
 
-        int daysInMonth = endOfMonth.getDayOfMonth();
-        List<Integer> doanhThuTheoNgay = new ArrayList<>(Collections.nCopies(daysInMonth, 0));
-        boolean isOnline = type.equals("online");
+        // Tạo danh sách doanh thu mặc định với giá trị 0
+        List<Integer> onlineSales = new ArrayList<>(Collections.nCopies(daysInRange, 0));
+        List<Integer> offlineSales = new ArrayList<>(Collections.nCopies(daysInRange, 0));
 
-        if(isOnline) {
-            paymentHistoryRepo.findAll().stream()
-                    .filter(payment ->  payment.getInvoice() != null &&
-                            !payment.getPaymentDate().toLocalDate().isBefore(startOfMonth) &&
-                            !payment.getPaymentDate().toLocalDate().isAfter(endOfMonth))
-                    .forEach(payment -> {
-                        int day = payment.getPaymentDate().getDayOfMonth();
-                        int totalPrice = payment.getAmountPaid();
-                        doanhThuTheoNgay.set(day - 1, doanhThuTheoNgay.get(day - 1) + totalPrice);
-                    });
-        } else{
-            paymentHistoryRepo.findAll().stream()
-                    .filter(payment -> payment.getInvoice() == null &&
-                            !payment.getPaymentDate().toLocalDate().isBefore(startOfMonth) &&
-                            !payment.getPaymentDate().toLocalDate().isAfter(endOfMonth))
-                    .forEach(payment -> {
-                        int day = payment.getPaymentDate().getDayOfMonth();
-                        int totalPrice = payment.getAmountPaid();
-                        doanhThuTheoNgay.set(day - 1, doanhThuTheoNgay.get(day - 1) + totalPrice);
-                    });
-        }
+        // Duyệt qua tất cả các payment trong paymentHistoryRepo
+        paymentHistoryRepo.findAll().stream()
+                .filter(payment -> {
+                    LocalDate paymentDate = payment.getPaymentDate().toLocalDate();
+                    return !paymentDate.isBefore(startDate) && !paymentDate.isAfter(endDate);
+                })
+                .forEach(payment -> {
+                    int dayIndex = (int) ChronoUnit.DAYS.between(startDate, payment.getPaymentDate().toLocalDate());
+                    int totalPrice = payment.getAmountPaid();
 
-        return doanhThuTheoNgay;
+                    if (payment.getInvoice().getShippingAddress() != null) { // Online
+                        onlineSales.set(dayIndex, onlineSales.get(dayIndex) + totalPrice);
+                    } else { // Offline
+                        offlineSales.set(dayIndex, offlineSales.get(dayIndex) + totalPrice);
+                    }
+                });
+
+        // Tạo map trả về
+        Map<String, List<Integer>> result = new HashMap<>();
+        result.put("onlineSales", onlineSales);
+        result.put("offlineSales", offlineSales);
+
+        return result;
     }
-
 
 
 
@@ -137,7 +137,7 @@ public class DashBoard {
                 ++total;
             }
         }
-        return !paymentHistories.isEmpty() ? (double) total/paymentHistories.size() : 0;
+        return !paymentHistories.isEmpty() ?  total*100.0/paymentHistories.size() : 0;
     }
 
 

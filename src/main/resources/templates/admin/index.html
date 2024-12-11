@@ -221,16 +221,14 @@
 
 
             <div class="card" >
-                <div class="card-header" >
+                <div class="card-header">
                     <div class="fw-semibold fs-6">Bán Hàng</div>
                     <div class="d-flex" style="gap: 10px;">
-                        <select id="salesType" class="form-control mr-2">
-                            <option value="offline">Tại quầy</option>
-                            <option value="online">Bán online</option>
-                        </select>
-                        <input id="salesDate" type="date" class="form-control" value="2024-06-05">
+                        <input id="startDate" type="date" class="form-control" value="2024-06-01">
+                        <input id="endDate" type="date" class="form-control" value="2024-06-07">
                     </div>
                 </div>
+
                 <div class="d-flex chart-container-wrapper">
                     <!-- Biểu đồ cột -->
                     <div class="chart-container">
@@ -326,6 +324,10 @@
 
 
         </div>
+        // HTML phần giao diện:
+
+
+        // JavaScript để xử lý dữ liệu và hiển thị biểu đồ:
         <script>
             const ctx = document.getElementById('salesChart').getContext('2d');
 
@@ -336,10 +338,17 @@
                     labels: [], // Sẽ được cập nhật từ API
                     datasets: [
                         {
-                            label: 'Doanh số',
-                            data: [], // Sẽ được cập nhật từ API
+                            label: 'Doanh thu Online',
+                            data: [], // Dữ liệu online
                             borderColor: 'rgba(54, 162, 235, 1)',
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            fill: true,
+                        },
+                        {
+                            label: 'Doanh thu Tại quầy',
+                            data: [], // Dữ liệu offline
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             fill: true,
                         }
                     ]
@@ -355,7 +364,7 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'tháng theo năm'
+                                text: 'Ngày'
                             }
                         },
                         y: {
@@ -370,42 +379,39 @@
             });
 
             // Hàm fetch dữ liệu từ RestController
-            async function fetchMonthlySales(month, year, type) {
+            async function fetchSalesData(startDate, endDate) {
                 try {
-                    const response = await fetch(`/doanhthu?month=${month}&year=${year}&type=${type}`);
+                    const response = await fetch(`/doanhthu?startDate=${startDate}&endDate=${endDate}`);
                     const data = await response.json();
 
                     // Cập nhật dữ liệu cho biểu đồ
-                    salesChart.data.labels = data.labels; // Mảng ngày [1, 2, ..., 31]
-                    salesChart.data.datasets[0].data = data.sales; // Mảng doanh thu
+                    salesChart.data.labels = data.labels; // Ngày
+                    salesChart.data.datasets[0].data = data.onlineSales; // Doanh thu online
+                    salesChart.data.datasets[1].data = data.offlineSales; // Doanh thu offline
                     salesChart.update(); // Cập nhật biểu đồ
                 } catch (error) {
                     console.error('Lỗi khi lấy dữ liệu:', error);
                 }
             }
 
-            // Lấy giá trị tháng, năm và loại bán hàng từ người dùng
+            // Lấy giá trị từ người dùng
             function updateSalesChart() {
-                const dateInput = document.getElementById('salesDate').value;
-                const salesType = document.getElementById('salesType').value;
-
-                // Chuyển ngày thành tháng và năm
-                const selectedDate = new Date(dateInput);
-                const month = selectedDate.getMonth() + 1; // Tháng (1-12)
-                const year = selectedDate.getFullYear(); // Năm
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
 
                 // Gọi hàm fetch dữ liệu
-                fetchMonthlySales(month, year, salesType);
+                fetchSalesData(startDate, endDate);
             }
 
             // Lắng nghe sự kiện thay đổi
-            document.getElementById('salesDate').addEventListener('change', updateSalesChart);
-            document.getElementById('salesType').addEventListener('change', updateSalesChart);
+            document.getElementById('startDate').addEventListener('change', updateSalesChart);
+            document.getElementById('endDate').addEventListener('change', updateSalesChart);
 
-            // Gọi hàm fetch dữ liệu lần đầu (tháng hiện tại)
+            // Gọi lần đầu tiên với ngày mặc định
             updateSalesChart();
 
         </script>
+
         <script>
             // Ensure you are using the right chart data
             const ctxPie = document.getElementById('pieChart1').getContext('2d');
