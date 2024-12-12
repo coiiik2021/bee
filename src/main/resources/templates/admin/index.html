@@ -241,11 +241,44 @@
                 </div>
 
 
-                <strong>Sản phẩm bán chạy</strong>
-                <table id="topSellingProductsTable" border="1">
-                    <!-- Bảng sẽ được cập nhật từ script -->
-                </table>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+                    <!-- Bảng Sản phẩm bán chạy -->
+                    <div style="flex: 1;">
+                        <strong>Sản phẩm bán chạy</strong>
+                        <table id="topSellingProductsTable" border="1" style="width: 100%; border-collapse: collapse;">
+                            <!-- Bảng sẽ được cập nhật từ script -->
+                        </table>
+                    </div>
+
+                    <!-- Bảng Top khách hàng -->
+                    <div style="flex: 1;">
+                        <strong>Top khách hàng</strong>
+                        <table style="width: 100%; border-collapse: collapse;" border="1">
+                            <thead>
+                            <tr style="text-align: center">
+                                <th>STT</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Tổng đơn hàng</th>
+                                <th>Tổng giá trị</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="customer, stt : ${topCustomers}" style="text-align: center">
+                                <td>[[${stt.index + 1}]]</td>
+                                <td>[[${customer.nameCustomer}]]</td>
+                                <td>[[${customer.phoneNumber}]]</td>
+                                <td>[[${customer.totalOrders}]]</td>
+                                <td>[[${customer.totalPayments}]] đ</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
             </div>
+
 
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -279,16 +312,15 @@
                         productCountMap.forEach(product => {
                             const row = document.createElement("tr");
 
-                            // Tạo thẻ img để hiển thị hình ảnh sản phẩm
+
                             const imageCell = document.createElement("td");
                             const imageElement = document.createElement("img");
-                            imageElement.src = product.image; // Đặt nguồn ảnh
-                            imageElement.alt = product.name; // Thêm tên sản phẩm vào alt cho ảnh
-                            imageElement.style.width = "100px"; // Đặt kích thước ảnh nếu cần
-                            imageElement.style.height = "100px"; // Đặt kích thước ảnh nếu cần
+                            imageElement.src = product.image;
+                            imageElement.alt = product.name;
+                            imageElement.style.width = "100px";
+                            imageElement.style.height = "100px";
                             imageCell.appendChild(imageElement);
 
-                            // Tạo các ô dữ liệu cho tên, số lượng bán và giá
                             const nameCell = document.createElement("td");
                             nameCell.textContent = product.name;
 
@@ -296,26 +328,22 @@
                             quantityCell.textContent = product.sl;
 
                             const priceCell = document.createElement("td");
-                            priceCell.textContent = product.price;
+                            priceCell.textContent = product.price + " đ";
 
-                            // Thêm các ô vào dòng
                             row.appendChild(imageCell);
                             row.appendChild(nameCell);
                             row.appendChild(quantityCell);
                             row.appendChild(priceCell);
 
-                            // Thêm dòng vào thân bảng
                             tableBody.appendChild(row);
                         });
 
-                        // Thêm thân bảng vào bảng chính
                         productTable.appendChild(tableBody);
                     } catch (error) {
                         console.error("Lỗi khi tải danh sách sản phẩm bán chạy:", error);
                     }
                 }
 
-                // Gọi hàm lấy danh sách sản phẩm bán chạy với giới hạn 5 sản phẩm
                 fetchTopSellingProducts(5);
             </script>
 

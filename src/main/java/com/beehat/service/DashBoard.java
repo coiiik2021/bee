@@ -24,7 +24,7 @@ public class DashBoard {
 
 
     public int[] total(){
-        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll();
+        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll().stream().filter(payment ->payment.getInvoice().getStatus() == 8).toList();
         int total = 0;
         for (PaymentHistory paymentHistory : paymentHistories) {
             total += paymentHistory.getAmountPaid();
@@ -34,7 +34,6 @@ public class DashBoard {
     }
 
     public Map<String, List<Integer>> getDoanhThuTongHop(LocalDate startDate, LocalDate endDate) {
-        // Số ngày giữa startDate và endDate
         int daysInRange = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
 
         // Tạo danh sách doanh thu mặc định với giá trị 0
@@ -48,14 +47,17 @@ public class DashBoard {
                     return !paymentDate.isBefore(startDate) && !paymentDate.isAfter(endDate);
                 })
                 .forEach(payment -> {
-                    int dayIndex = (int) ChronoUnit.DAYS.between(startDate, payment.getPaymentDate().toLocalDate());
-                    int totalPrice = payment.getAmountPaid();
+                    if(payment.getInvoice().getStatus() == 8) {
+                        int dayIndex = (int) ChronoUnit.DAYS.between(startDate, payment.getPaymentDate().toLocalDate());
+                        int totalPrice = payment.getAmountPaid();
 
-                    if (payment.getInvoice().getShippingAddress() != null) { // Online
-                        onlineSales.set(dayIndex, onlineSales.get(dayIndex) + totalPrice);
-                    } else { // Offline
-                        offlineSales.set(dayIndex, offlineSales.get(dayIndex) + totalPrice);
+                        if (payment.getInvoice().getShippingAddress() != null && payment.getInvoice().getStatus() == 8) { // Online
+                            onlineSales.set(dayIndex, onlineSales.get(dayIndex) + totalPrice);
+                        } else { // Offline
+                            offlineSales.set(dayIndex, offlineSales.get(dayIndex) + totalPrice);
+                        }
                     }
+
                 });
 
         // Tạo map trả về
@@ -66,17 +68,12 @@ public class DashBoard {
         return result;
     }
 
-
-
-
-
-
     public int[] totalOnline(){
-        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll();
+        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll().stream().filter(payment ->payment.getInvoice().getStatus() == 8).toList();
         int total = 0;
         int dem = 0;
         for (PaymentHistory paymentHistory : paymentHistories) {
-            if(paymentHistory.getInvoice().getShippingAddress() != null){
+            if(paymentHistory.getInvoice().getShippingAddress() != null && paymentHistory.getInvoice().getStatus() == 8) {
                 total += paymentHistory.getAmountPaid();
                 ++dem;
             }
@@ -93,19 +90,20 @@ public class DashBoard {
         int monthLienKe = monthValue != 1 ? monthValue - 1 : 12;
 
 
-        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll();
+        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll().stream().filter(payment -> payment.getInvoice().getStatus() == 8).toList();
 
         int totalThangLienKeOnline = 0, totalThangHienTaiOnline = 0, totalThangHienTaiOffline = 0, totalThangLienKeOffline = 0;
 
         for(PaymentHistory paymentHistory : paymentHistories){
             if(paymentHistory.getInvoice().getShippingAddress() != null){
-                if(yearOle == paymentHistory.getPaymentDate().getYear() && monthLienKe == paymentHistory.getPaymentDate().getMonthValue()){
-                    totalThangLienKeOnline += paymentHistory.getAmountPaid();
+                if(paymentHistory.getInvoice().getStatus() == 8){
+                    if(yearOle == paymentHistory.getPaymentDate().getYear() && monthLienKe == paymentHistory.getPaymentDate().getMonthValue()){
+                        totalThangLienKeOnline += paymentHistory.getAmountPaid();
+                    }
+                    if(dateTime.getYear() == paymentHistory.getPaymentDate().getYear() && monthValue == paymentHistory.getPaymentDate().getMonthValue()){
+                        totalThangHienTaiOnline += paymentHistory.getAmountPaid();
+                    }
                 }
-                if(dateTime.getYear() == paymentHistory.getPaymentDate().getYear() && monthValue == paymentHistory.getPaymentDate().getMonthValue()){
-                    totalThangHienTaiOnline += paymentHistory.getAmountPaid();
-                }
-
             }else{
                 if(yearOle == paymentHistory.getPaymentDate().getYear() && monthLienKe == paymentHistory.getPaymentDate().getMonthValue()){
                     totalThangLienKeOffline += paymentHistory.getAmountPaid();
@@ -130,15 +128,16 @@ public class DashBoard {
     }
 
     public double tileOnlineTrenOffline(){
-        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll();
+        List<PaymentHistory> paymentHistories = paymentHistoryRepo.findAll().stream().filter(payment -> payment.getInvoice().getStatus() == 8).toList();
         int total = 0;
         for(PaymentHistory paymentHistory : paymentHistories){
-            if(paymentHistory.getInvoice().getShippingAddress() != null){
+            if(paymentHistory.getInvoice().getShippingAddress() != null && paymentHistory.getInvoice().getStatus() == 8){
                 ++total;
             }
         }
         return !paymentHistories.isEmpty() ?  total*100.0/paymentHistories.size() : 0;
     }
+
 
 
 

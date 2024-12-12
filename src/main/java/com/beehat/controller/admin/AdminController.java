@@ -2,6 +2,7 @@ package com.beehat.controller.admin;
 
 import com.beehat.entity.Employee;
 import com.beehat.repository.EmployeeRepo;
+import com.beehat.service.CustomerService;
 import com.beehat.service.DashBoard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,8 @@ public class AdminController {
     @Autowired
     DashBoard dashBoard;
 
+    @Autowired
+    CustomerService customerService;
 
     @ModelAttribute("iconTitle")
     String iconTitle() {
@@ -52,6 +55,7 @@ public class AdminController {
         model.addAttribute("online", online);
         model.addAttribute("offline", offline);
         model.addAttribute("tile", tile);
+        model.addAttribute("topCustomers", customerService.getListCustomerTopOrder());
 
         return "admin/index";
     }

@@ -28,12 +28,13 @@ public class InvoiceDetailService {
         for (InvoiceDetail invoiceDetail : invoiceDetailList) {
             ProductDetail productDetail = invoiceDetail.getProductDetail();
             int quantity = invoiceDetail.getQuantity();
-            System.out.println(productDetail);
 
-            if (productDetail != null && result.containsKey(productDetail.getProduct())) {
-                result.put(productDetail.getProduct(), result.get(productDetail.getProduct()) + quantity);
-            } else {
-                result.put(productDetail.getProduct(), quantity);
+            if(invoiceDetail.getInvoice().getStatus() == 8){
+                if (productDetail != null && result.containsKey(productDetail.getProduct())) {
+                    result.put(productDetail.getProduct(), result.get(productDetail.getProduct()) + quantity);
+                } else {
+                    result.put(productDetail.getProduct(), quantity);
+                }
             }
         }
 
